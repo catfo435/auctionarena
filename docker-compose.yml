@@ -1,0 +1,40 @@
+services:
+
+  client:
+    build: client
+    ports:
+     - 5173:5173
+    networks:
+      - mern
+    env_file:
+      - "/client/.env"
+  
+  server:
+    build: server
+    ports:
+     - 4000:4000
+    networks:
+     - mern
+    depends_on:
+      - postgres
+    env_file:
+      - "/server/.env"
+  
+  postgres:
+    image: postgres:alpine
+    ports:
+      - 5432:5432
+    networks:
+      - mern
+    volumes:
+      - ./server/config/db-init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=auctionportaldb
+      - DB_HOST=postgres
+
+
+networks:
+  mern:
+      driver: bridge

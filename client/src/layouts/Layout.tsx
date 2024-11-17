@@ -6,7 +6,7 @@ const Layout: FunctionComponent = () => {
     return ( 
         <div className="rootLayout flex flex-col w-screen h-screen">
             <Header />
-            <div className="content flex w-full grow">
+            <div className="content flex w-full grow overflow-y-scroll">
                 <Outlet />
             </div>
         </div>

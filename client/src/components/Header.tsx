@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 const Header: FunctionComponent = () => {
     return (
-        <div className="header flex justify-between items-center w-full h-16 px-36 shadow-md text-amber-900">
+        <div className="header flex justify-between items-center w-full shrink-0 h-16 px-36 shadow-md text-amber-900">
             <div className="logoContainer flex justify-center items-center space-x-2 font-semibold">
                 <RiAuctionFill size="25px" />
                 <span className="text-2xl tracking-wider">Auction Arena</span>

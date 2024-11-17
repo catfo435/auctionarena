@@ -25,8 +25,8 @@ const Home: FunctionComponent = () => {
     }, [location]);
 
     return (
-        <div className="homePage w-full h-full flex flex-col space-y-14">
-            <div className="routeSpecifier flex justify-between items-center px-36 h-36 bg-gray-200">
+        <div className="homePage w-full h-full flex flex-col space-y-10">
+            <div className="routeSpecifier flex justify-between items-center px-36 h-32 bg-gray-200">
                 <span className="text-5xl text-orange-600 font-extrabold">{`HOME > ${activePath.toUpperCase()}`}</span>
                 <span className="italic text-xl">Personal Dashboard</span>
             </div>

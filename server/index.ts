@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import pool from './config/db';
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import { authenticateToken } from './middleware/authenticateToken';
 import userRoutes from './routes/user'
 dotenv.config();
@@ -12,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 pool.connect()
 
 app.use(express.json());
+app.use(cookieParser())
 
 app.use(cors({
   origin : process.env.FRONTEND_URL,

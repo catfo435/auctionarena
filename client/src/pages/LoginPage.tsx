@@ -56,59 +56,47 @@ const LoginPage = () => {
   };
 
   const handleLoginFailure = () => {
-    toastError("Login Failed");
+    toastError(`${isSignup?'Sign Up':'Login'} Failed`);
   };
 
   return (
-    <div className="flex h-screen justify-center items-center bg-gradient-to-r from-blue-500 to-indigo-600">
-      <div className="bg-white p-10 rounded-xl shadow-lg w-full max-w-md">
-        <h1 className="text-3xl font-semibold text-center mb-6 text-gray-800">
-          {isSignup ? "Sign Up" : "Welcome Back"}
-        </h1>
-        <p className="text-center mb-6 text-gray-600">
-          {isSignup
-            ? "Please create an account using your Google account."
-            : "Please sign in with your Google account to continue."}
-        </p>
+    <div className="flex flex-col space-y-5 h-screen items-center bg-gray-100">
+      <div className="flex flex-col items-center justify-center py-14 h-20">
+        <h1 className="text-4xl font-bold text-gray-800">Auction Area</h1>
+        <p className="text-lg text-gray-600">Your trusted online auction platform</p>
+      </div>
 
-        {isSignup ? (
+      <div className="flex items-center justify-center w-1/2">
+        <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-lg">
+          <h2 className="text-3xl font-semibold text-center mb-6 text-gray-800">
+            {isSignup ? "Create an Account" : "Welcome Back"}
+          </h2>
+          <p className="text-center mb-6 text-gray-600">
+            {isSignup
+              ? "Please create an account using your Google account."
+              : "Sign in with your Google account to continue."}
+          </p>
+
           <div>
-            <div className="flex justify-center mb-6">
-              <GoogleLogin
-                onSuccess={handleGoogleSignUpSuccess}
-                onError={handleLoginFailure}
-                text={isSignup?"signup_with":"signin_with"}
-              />
+              <div className="flex justify-center mb-6">
+                <GoogleLogin
+                  onSuccess={isSignup?handleGoogleSignUpSuccess:handleLoginSuccess}
+                  onError={handleLoginFailure}
+                  text={isSignup ? "signup_with" : "signin_with"}
+                  theme="outline"
+                />
+              </div>
+              <p className="flex justify-center text-center text-gray-600 space-x-1">
+                <span>{isSignup?"Already have an account?":"Don't have an account?"}</span>
+                <button
+                  onClick={() => setIsSignup(!isSignup)}
+                  className="text-indigo-600 hover:text-indigo-500 transition-all"
+                >
+                  {isSignup?"Login":"Sign Up"}
+                </button>
+              </p>
             </div>
-            <p className="text-center text-gray-600">
-              Already have an account?{" "}
-              <button
-                onClick={() => setIsSignup(false)}
-                className="text-indigo-600"
-              >
-                Login
-              </button>
-            </p>
-          </div>
-        ) : (
-          <div>
-            <div className="flex justify-center mb-6">
-              <GoogleLogin
-                onSuccess={handleLoginSuccess}
-                onError={handleLoginFailure}
-              />
-            </div>
-            <p className="text-center text-gray-600">
-              Don't have an account?{" "}
-              <button
-                onClick={() => setIsSignup(true)}
-                className="text-indigo-600"
-              >
-                Sign Up
-              </button>
-            </p>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

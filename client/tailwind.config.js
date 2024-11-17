@@ -7,6 +7,10 @@ export default {
   theme: {
     extend: {},
   },
-  plugins: [],
+  plugins: [function({ addBase }) {
+    addBase({
+      html: { fontSize: '12px' },
+    });
+  }],
 }
 

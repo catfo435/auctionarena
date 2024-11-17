@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 
 const client = new OAuth2Client(process.env.OAUTH_CID);
@@ -12,20 +11,16 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     return;
   }
 
-  jwt.verify(token, process.env.JWT_SECRET_KEY!, (err: any,decoded: any) => {
-    if (err || !decoded) {
-      client.verifyIdToken({
-        idToken: token,
-        audience: process.env.OAUTH_CID,
-      })
-      .then(() => {
-        next();
-      })
-      .catch(() => {
-        res.status(440).json({ authenticated: false, message: 'Invalid or expired token' });
-      });
-    } else {
-      next();
-    }
+  client.verifyIdToken({
+    idToken: token,
+    audience: process.env.OAUTH_CID,
+  })
+  .then((ticket) => {
+    const { email } = ticket.getPayload()!
+    res.locals = { email }
+    next();
+  })
+  .catch(() => {
+    res.status(440).json({ authenticated: false, message: 'Invalid or expired token' });
   });
 };

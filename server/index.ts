@@ -5,6 +5,8 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import { authenticateToken } from './middleware/authenticateToken';
 import userRoutes from './routes/user'
+import auctionRoutes from './routes/auction'
+import artworkRoutes from './routes/artwork'
 dotenv.config();
 
 const app = express();
@@ -26,6 +28,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/api/user",userRoutes)
+app.use("/api/auction",auctionRoutes)
+app.use("/api/artwork",artworkRoutes)
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to the API for Art Auction Portal');

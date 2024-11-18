@@ -15,7 +15,7 @@ export const AuctionCard: FunctionComponent<AuctionCardProps> = ({
     timeLeft,
 }) => {
     return (
-        <Card className="w-96 flex items-center">
+        <Card className="p-2 flex items-center">
             <div className="flex items-center space-x-4">
                 <img
                     src={imageUrl}
@@ -23,7 +23,7 @@ export const AuctionCard: FunctionComponent<AuctionCardProps> = ({
                     className="w-32 h-32 object-cover rounded-lg"
                 />
                 <div className="flex flex-col space-y-6">
-                    <span className="text-2xl w-full text-center font-bold">{title}</span>
+                    <span className="text-xl w-full text-center font-bold">{title}</span>
                     <div className="space-y-2">
                         <p className="text-sm text-gray-500">
                             <span className="font-bold">Current Highest Bid: </span>

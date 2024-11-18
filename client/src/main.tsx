@@ -35,6 +35,7 @@ createRoot(document.getElementById('root')!).render(
             </Route>
             <Route path='/about' element={<AboutUsPage />} />
             <Route path='/auctions' element={<AuctionsPage />} />
+            <Route path='/auctions/:id' element={<AuctionsPage />} />
             <Route path='/artworks' element={<ArtworksPage />} />
           </Route>
           <Route path='/login' element={<LoginPage />} />

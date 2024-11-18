@@ -10,7 +10,7 @@ const ArtworksPage: FunctionComponent = () => {
     useEffect(() => {
         const fetchArtworks = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/artwork`);
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/artwork`, {credentials : "include"});
                 const data = await response.json();
                 setArtworks(data.artworks);
                 setLoading(false);

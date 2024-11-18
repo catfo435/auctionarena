@@ -1,7 +1,10 @@
 import { Router, Request, Response } from "express";
 import pool from "../config/db";
+import { authenticateToken } from "../middleware/authenticateToken";
 
 const router: Router = Router()
+
+router.use(authenticateToken)
 
 router.get('/', async (req: Request, res: Response) => {
     try {
@@ -18,7 +21,13 @@ router.get('/', async (req: Request, res: Response) => {
         `;
 
         const result = await pool.query(query);
-        res.json({ artworks: result.rows });
+
+        const artworks = result.rows.map(row => ({
+            ...row,
+            highest_price: parseFloat(row.highest_price),
+        }));
+
+        res.json({ artworks });
     } catch (err) {
         console.error(err);
         res.status(500).send("Internal Server Error");

@@ -76,7 +76,8 @@ const Dashboard: FunctionComponent = () => {
             </div>
 
             {/* Auctions Table */}
-            <div className="mt-6 w-full">
+            <div className="flex flex-col space-y-4 mt-6 px-3 w-full">
+                <span className="font-bold text-2xl">My Ongoing Bids</span>
                 <table className="table-auto w-full border-collapse border border-gray-300">
                     <thead>
                         <tr className="bg-gray-100 text-left">

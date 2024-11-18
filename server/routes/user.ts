@@ -48,12 +48,12 @@ router.get('/info', authenticateToken, getUserIdFromEmail, async (req: Request, 
             const statsQuery = `
                 SELECT
                     (SELECT COUNT(*) FROM bids WHERE bidder_uid = $1) AS bids_placed,
-                    (SELECT COUNT(*) FROM auctions WHERE artwork_id IN (SELECT artwork_id FROM artworks WHERE artist_id = $1)) AS total_auctions,
+                    (SELECT COUNT(*) FROM auction_history WHERE uid = $1) AS total_auctions,
                     (SELECT COUNT(*) FROM auction_results WHERE winner_uid = $1) AS auctions_won,
                     (SELECT COUNT(DISTINCT a.auction_id)
                      FROM bids b
                      JOIN auctions a ON b.auction_id = a.auction_id
-                     WHERE b.bidder_uid = $1
+                     WHERE b.bidder_uid = $1 AND a.status='ongoing'
                      AND b.bid_price = (SELECT MAX(bid_price) FROM bids WHERE auction_id = b.auction_id)) AS auctions_leading
             `;
             const stats = await pool.query(statsQuery, [userId]);

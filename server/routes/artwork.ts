@@ -6,13 +6,13 @@ const router: Router = Router()
 router.get('/', async (req: Request, res: Response) => {
     try {
         const query = `
-            SELECT artworks.artwork_id, artworks.title, artworks.image_url,
-                   COALESCE(MAX(bids.bid_price), artworks.start_price) AS highest_price,
+            SELECT artworks.artwork_id,auctions.auction_id, artworks.title, artworks.image_url,
+                   MAX(bids.bid_price) AS highest_price,
                    auctions.status
             FROM artworks
             JOIN auctions ON artworks.artwork_id = auctions.artwork_id
             LEFT JOIN bids ON auctions.auction_id = bids.auction_id
-            GROUP BY artworks.artwork_id,auctions.status
+            GROUP BY artworks.artwork_id,auctions.status,auctions.auction_id
             ORDER BY highest_price DESC
             LIMIT 10;
         `;

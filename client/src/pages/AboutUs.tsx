@@ -2,7 +2,7 @@ import { FunctionComponent } from "react";
 const AboutUsPage: FunctionComponent = () => {
     const teamMembers = [
         { name: "P. V. Pranava Sreeyush", id: "2022AAPS0274H" },
-        { name: "Tanay Rajesh Garde", id: "2022AAPS0610H" },
+        { name: "Tanay Rajesh Garde", id: "2022A3PS0610H" },
         { name: "Rohan R Venugopal", id: "2022AAPS0407H" },
         { name: "Sarthak Samir Shah", id: "2021B4TS2793H" },
     ];

@@ -35,7 +35,7 @@ const ArtworksPage: FunctionComponent = () => {
             </div>
 
             <div className="flex justify-center w-full grow px-36">
-                <div className="artworksGrid grid grid-cols-3 gap-8 py-10 w-full lg:w-3/4 h-fit">
+                <div className="artworksGrid grid grid-cols-3 gap-8 py-10 w-full lg:w-3/4 h-[35rem] overflow-y-auto">
                     {/* Artworks */}
                     {artworks.length === 0 ? (
                             <div>No artworks available.</div>

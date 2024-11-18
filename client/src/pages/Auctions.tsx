@@ -33,7 +33,7 @@ const AuctionsPage: FunctionComponent = () => {
 
     const fetchAuction = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auction/${id}`, {credentials : "include"});
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auction/${id}`, { credentials: "include" });
             const data = await response.json();
             setSelectedAuction(data)
             setIsModalOpen(true);
@@ -46,8 +46,8 @@ const AuctionsPage: FunctionComponent = () => {
 
     const fetchAuctions = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auction`, {credentials : "include"});
-            const data : AuctionsResponse = await response.json();
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auction`, { credentials: "include" });
+            const data: AuctionsResponse = await response.json();
             setTrendingAuctions(data.trendingAuctions);
             setNewestAuctions(data.newestAuctions);
             setLoading(false);
@@ -63,9 +63,9 @@ const AuctionsPage: FunctionComponent = () => {
         fetchAuctions();
     }, []);
 
-    useEffect(() =>{
+    useEffect(() => {
         if (id) fetchAuction()
-    },[id])
+    }, [id])
 
     // Function to format the time left in a human-readable way
     const formatTimeLeft = (endTime: string) => {
@@ -79,12 +79,7 @@ const AuctionsPage: FunctionComponent = () => {
         const minutes = Math.floor((timeDiff % (1000 * 3600)) / (1000 * 60));
         return `${hours}h ${minutes}m left`;
     };
-
-    const openModal = (auction: any) => {
-        setSelectedAuction(auction);
-        setIsModalOpen(true);
-    };
-
+    
     const closeModal = () => {
         setIsModalOpen(false);
         setSelectedAuction(null);
@@ -103,26 +98,24 @@ const AuctionsPage: FunctionComponent = () => {
                     uid: "your-user-id",
                     amount,
                 }),
-                credentials : "include"
+                credentials: "include"
             });
-    
+
             if (!response.ok) {
                 const error = await response.json();
                 console.error("Failed to place bid:", error.message);
                 toastError("Failed to place bid: " + error.message);
                 return;
             }
-    
-            const result = await response.json();
-            console.log("Bid placed successfully:", result);
+
             toastSuccess("Bid placed successfully!");
-    
+
             fetchAuction()
         } catch (error) {
             console.error("Error placing bid:", error);
             toastError("An error occurred while placing the bid.");
         }
-    };    
+    };
 
     if (loading) {
         return <div className="text-center p-8">Loading auctions...</div>;
@@ -172,14 +165,14 @@ const AuctionsPage: FunctionComponent = () => {
                         ) : (
                             <div className="flex space-x-4">
                                 {newestAuctions.map((auction, index) => (
-                                    <div className="hover:bg-gray-100" key={index} onClick={() => openModal(auction)}>
+                                    <Link to={`/auctions/${auction.auction_id}`} key={index}>
                                         <AuctionCard
                                             title={auction.artwork_title}
                                             imageUrl={auction.image_url}
-                                            highestBid={auction.highest_bid}
+                                            highestBid={(auction.highest_bid)}
                                             timeLeft={formatTimeLeft(auction.e_time)}
                                         />
-                                    </div>
+                                    </Link>
                                 ))}
                             </div>
                         )}

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { OAuth2Client } from 'google-auth-library';
 
-const client = new OAuth2Client(process.env.OAUTH_CID);
+const client = new OAuth2Client(process.env.VITE_OAUTH_CID);
 
 export const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
   const token = req.cookies.token;
@@ -13,7 +13,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 
   client.verifyIdToken({
     idToken: token,
-    audience: process.env.OAUTH_CID,
+    audience: process.env.VITE_OAUTH_CID,
   })
   .then((ticket) => {
     const { email } = ticket.getPayload()!

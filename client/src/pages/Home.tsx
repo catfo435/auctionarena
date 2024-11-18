@@ -6,6 +6,7 @@ import { RiAuctionFill } from "react-icons/ri";
 import { HiMiniTrophy } from "react-icons/hi2";
 import { MdReviews } from "react-icons/md";
 import { toastError } from "../toasts";
+import { Button } from "flowbite-react";
 
 interface User {
     name: string
@@ -26,6 +27,14 @@ const Home: FunctionComponent = () => {
 
     const [activePath, setActivePath] = useState("dashboard");
     const [user, setUser] = useState<User>()
+
+    const handleLogout = () => {
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/user/logout`, {
+          method: "POST",
+          credentials: "include",
+        });
+        navigate("/login");
+      }
 
     // Sync `activePath` with `location.pathname` on route changes
     useEffect(() => {
@@ -51,11 +60,7 @@ const Home: FunctionComponent = () => {
 
     return (
         <div className="homePage w-full h-full flex flex-col space-y-10">
-            <div className="routeSpecifier flex justify-between items-center px-36 h-32 bg-gray-200">
-                <span className="text-5xl text-orange-600 font-extrabold">{`HOME > ${activePath === 'auctionswon' ? "AUCTIONS WON" :activePath.toUpperCase()}`}</span>
-                <span className="italic text-xl">Personal Dashboard</span>
-            </div>
-            <div className="infoContainer flex w-full grow px-36 pb-5">
+            <div className="infoContainer flex w-full grow px-36 py-5">
                 <div className="grid grid-cols-4 w-full h-full">
                     <div className="profileNav flex flex-col space-y-5">
                         <div className="profileInfo flex items-center space-x-2">
@@ -84,6 +89,9 @@ const Home: FunctionComponent = () => {
                                 </Link>
                             ))}
                         </nav>
+                        <div className="flex h-fit justify-center">
+                            <Button color="failure" size="lg" onClick={handleLogout}>Logout</Button>
+                        </div>
                     </div>
                     <div className="infoDisplay col-span-3 rounded-lg bg-gray-200">
                         <Outlet />

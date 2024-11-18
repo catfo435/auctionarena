@@ -218,7 +218,7 @@ router.post('/login', async (req: Request, res: Response) => {
     try {
         const ticket = await client.verifyIdToken({
             idToken: credentialResponse.credential,
-            audience: process.env.OAUTH_CID
+            audience: process.env.VITE_OAUTH_CID
         });
 
         const { email } = ticket.getPayload() as any;
@@ -238,7 +238,7 @@ router.post('/login', async (req: Request, res: Response) => {
         res.send("Login Successful");
     } catch (error) {
         console.error(error);
-        res.status(403).send("Invalid Credentials");
+        res.status(500).send("Internal Server Error");
     }
 });
 
@@ -249,7 +249,7 @@ router.post('/signup', async (req: Request, res: Response) => {
         const client = new OAuth2Client();
         const ticket = await client.verifyIdToken({
             idToken: credential,
-            audience: process.env.OAUTH_CID,
+            audience: process.env.VITE_OAUTH_CID,
         });
 
         const { email, name } = ticket.getPayload() as any;

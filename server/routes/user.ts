@@ -234,7 +234,7 @@ router.post('/login', async (req: Request, res: Response) => {
             secure: process.env.DEPLOYED_STATUS === "true",
             httpOnly: true,
             domain: process.env.DEPLOYED_STATUS === "true" ? req.headers.host!.split(':')[0] : "",
-            sameSite: "strict"
+            sameSite: "lax"
         });        
         res.send("Login Successful");
     } catch (error) {

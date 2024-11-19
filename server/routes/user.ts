@@ -233,8 +233,8 @@ router.post('/login', async (req: Request, res: Response) => {
         res.cookie("token", credentialResponse.credential, {
             secure: process.env.DEPLOYED_STATUS === "true",
             httpOnly: true,
-            domain: process.env.DEPLOYED_STATUS === "true" ? req.headers.host!.split(':')[0] : "",
-            sameSite: "lax"
+            domain: process.env.DEPLOYED_STATUS === "true" ? process.env.HOST_DOMAIN : "",
+            sameSite: "strict"
         });        
         res.send("Login Successful");
     } catch (error) {

@@ -229,14 +229,12 @@ router.post('/login', async (req: Request, res: Response) => {
             res.status(404).send("You are not allowed to login.")
             return
         }
-        
+
         res.cookie("token", credentialResponse.credential, {
             secure: process.env.DEPLOYED_STATUS === "true",
             httpOnly: true,
-            path: "/",
-            domain: process.env.DEPLOYED_STATUS === "true" ? process.env.HOST_DOMAIN : "",
-            sameSite: "lax"
-        });        
+            sameSite: process.env.DEPLOYED_STATUS === "true" ? "none" : "lax"
+        });
         res.send("Login Successful");
     } catch (error) {
         console.error(error);

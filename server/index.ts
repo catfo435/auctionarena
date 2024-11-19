@@ -33,30 +33,37 @@ app.use("/api/auction",auctionRoutes)
 app.use("/api/artwork",artworkRoutes)
 app.use("/api/review",reviewRoutes)
 
-const invalidateAuctions = async () => {
+const modifyAuctions = async () => {
   try {
-      const now = new Date();
       const query = `
+          -- Mark auctions as ongoing if their start time has passed and end time is in the future
+          UPDATE auctions
+          SET status = 'ongoing'
+          WHERE status = 'future' AND s_time <= NOW();
+
+          -- Mark auctions as ended if their end time has passed
           UPDATE auctions
           SET status = 'ended'
-          WHERE status = 'ongoing' AND e_time < $1::timestamp
+          WHERE status = 'ongoing' AND e_time < NOW();
       `;
-      const result = await pool.query(query, [now]);
+      
+      // Run the query using NOW() directly in the SQL
+      const result = await pool.query(query);
 
       if (result.rowCount) {
-          console.log(`Invalidated ${result.rowCount} auction(s):`, result.rows.map(row => row.auction_id));
+          console.log(`Modified ${result.rowCount} auction(s).`);
       } else {
-          console.log('No auctions to invalidate.');
+          console.log('No auctions to modify.');
       }
   } catch (error) {
-      console.error('Error invalidating auctions:', error);
+      console.error('Error modifying auctions:', error);
   }
 };
 
 // Schedule the task to run every minute
-// setInterval(() => {
-//   invalidateAuctions();
-// }, 60 * 1000);
+setInterval(() => {
+  modifyAuctions();
+}, 60 * 1000);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to the API for Art Auction Portal');

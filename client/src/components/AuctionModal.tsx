@@ -11,21 +11,33 @@ interface AuctionModalProps {
 export const AuctionModal: FunctionComponent<AuctionModalProps> = ({ isOpen, auction, onClose, onBid }) => {
     if (!isOpen || !auction) return null;
 
-    const formatTimeLeft = (endTime: string) => {
+    const formatTimeLeft = (startTime: string, endTime: string) => {
         const now = new Date();
+        const start = new Date(startTime);
         const end = new Date(endTime);
-        const timeDiff = end.getTime() - now.getTime();
+
+        let timeDiff = start > now ? start.getTime() - now.getTime() : end.getTime() - now.getTime();
 
         if (timeDiff <= 0) return "Auction Ended";
 
         const hours = Math.floor(timeDiff / (1000 * 3600));
         const minutes = Math.floor((timeDiff % (1000 * 3600)) / (1000 * 60));
-        return `${hours}h ${minutes}m left`;
+        const days = Math.floor(hours / 24);
+        const hoursLeft = hours % 24;
+
+        if (start > now) {
+            return `${days}d ${hoursLeft}h ${minutes}m to Auction`;
+        } else {
+            return `${hoursLeft}h ${minutes}m left`;
+        }
     };
 
     const handleBid = (amount: number) => {
         onBid(auction.highest_bid + amount);
     };
+
+    const isAuctionStarted = new Date(auction.s_time) < new Date();
+    const isAuctionInFuture = new Date(auction.s_time) > new Date();
 
     return (
         <Modal show={isOpen} onClose={onClose} size="3xl">
@@ -45,10 +57,14 @@ export const AuctionModal: FunctionComponent<AuctionModalProps> = ({ isOpen, auc
                                 style: "currency",
                                 currency: "INR",
                             })}</span>
-                            <span className="block"><strong>Time Left: </strong> {formatTimeLeft(auction.e_time)}</span>
+
+                            <span className="block">
+                                <strong>{isAuctionInFuture ? 'Time to Auction: ' : 'Time Left: '}</strong>
+                                {formatTimeLeft(auction.s_time, auction.e_time)}
+                            </span>
                         </div>
 
-                        {new Date(auction.e_time) > new Date() && (
+                        {isAuctionStarted && new Date(auction.e_time) > new Date() && (
                             <div className="flex flex-col items-center space-y-4 rounded-lg bg-gray-200 p-4">
                                 <span className="text-2xl">Increase Bid</span>
                                 <div className="flex justify-center space-x-4">

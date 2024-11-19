@@ -22,7 +22,7 @@ const Bids: FunctionComponent = () => {
 
     return (
         <div className="flex flex-col w-full h-full p-4">
-            <div className="mt-6 w-full">
+            <div className="mt-6 w-full overflow-y-auto h-full">
                 <table className="table-auto w-full border-collapse border border-gray-300">
                     <thead>
                         <tr className="bg-gray-100 text-left">

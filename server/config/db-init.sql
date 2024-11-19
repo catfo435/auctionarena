@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS auctions (
     s_price DECIMAL(10, 2) NOT NULL,
     e_price DECIMAL(10, 2),
     artwork_id UUID NOT NULL REFERENCES artworks(artwork_id),
-    status VARCHAR(20) DEFAULT 'ongoing' CHECK (status IN ('ongoing', 'ended')) -- Status to track auction state
+    status VARCHAR(20)  CHECK (status IN ('future', 'ongoing', 'ended')) -- Status to track auction state
 );
 
 -- Reviews table
@@ -66,6 +66,31 @@ CREATE TABLE IF NOT EXISTS auction_history (
 INSERT INTO users (uid, name, email)
 VALUES (uuid_generate_v4(), 'Admin', 'admin@auction.arena.dbms.com');
 
+CREATE OR REPLACE FUNCTION check_end_time_and_set_status()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Check that end_time is in the future for new rows
+    IF NEW.e_time <= NOW() THEN
+        RAISE EXCEPTION 'end_time must be in the future';
+    END IF;
+
+    -- Set status based on start_time
+    IF NEW.s_time > NOW() THEN
+        NEW.status := 'future';
+    ELSE
+        NEW.status := 'ongoing';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER before_insert_auction
+BEFORE INSERT ON AUCTIONS
+FOR EACH ROW
+EXECUTE FUNCTION check_end_time_and_set_status();
+
+
 -- Trigger Function: Validate Start Price
 CREATE OR REPLACE FUNCTION validate_start_price_fn()
 RETURNS TRIGGER AS $$
@@ -78,7 +103,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger: Validate Start Price
-CREATE TRIGGER validate_start_price
+CREATE OR REPLACE TRIGGER validate_start_price
 BEFORE INSERT ON auctions
 FOR EACH ROW
 EXECUTE FUNCTION validate_start_price_fn();
@@ -88,9 +113,8 @@ CREATE OR REPLACE FUNCTION after_auction_insert_fn()
 RETURNS TRIGGER AS $$
 BEGIN
     -- Insert an initial bid for the auction
-    INSERT INTO bids (bid_id, auction_id, bidder_uid, bid_price, bid_time)
+    INSERT INTO bids (auction_id, bidder_uid, bid_price, bid_time)
     VALUES (
-        uuid_generate_v4(),  -- Generate a new UUID for the bid_id
         NEW.auction_id,      -- Use the auction_id of the new auction
         (SELECT uid FROM users WHERE email = 'admin@auction.arena.dbms.com'), -- Admin's user_id
         NEW.s_price,         -- Use the start_price of the auction
@@ -101,7 +125,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger: Initial Bid Insertion
-CREATE TRIGGER after_auction_insert
+CREATE OR REPLACE TRIGGER after_auction_insert
 AFTER INSERT ON auctions
 FOR EACH ROW
 EXECUTE FUNCTION after_auction_insert_fn();
@@ -160,7 +184,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER add_to_auction_history
+CREATE OR REPLACE TRIGGER add_to_auction_history
 AFTER INSERT ON bids
 FOR EACH ROW
 EXECUTE FUNCTION add_to_auction_history_func();
@@ -196,7 +220,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER set_auction_winner
+CREATE OR REPLACE TRIGGER set_auction_winner
 AFTER UPDATE ON auctions
 FOR EACH ROW
 WHEN (OLD.status = 'ongoing' AND NEW.status = 'ended') -- Trigger only when the auction ends
@@ -223,7 +247,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER validate_bid_price
+CREATE OR REPLACE TRIGGER validate_bid_price
 BEFORE INSERT ON bids
 FOR EACH ROW
 EXECUTE FUNCTION validate_bid_price_func();
@@ -232,27 +256,68 @@ EXECUTE FUNCTION validate_bid_price_func();
 CREATE OR REPLACE FUNCTION check_auction_status_before_bid()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Check if the auction's end time has already passed
+    -- Skip the check if the bidder is the admin
+    IF EXISTS (
+        SELECT 1
+        FROM users
+        WHERE uid = NEW.bidder_uid
+        AND email = 'admin@auction.arena.dbms.com'
+    ) THEN
+        RETURN NEW;
+    END IF;
+
+    -- Check if the auction's end time has already passed or start time is in the future
     IF EXISTS (
         SELECT 1
         FROM auctions
         WHERE auction_id = NEW.auction_id
-        AND e_time < NOW()
+        AND (e_time < NOW() OR s_time > NOW())
     ) THEN
-        -- Raise an exception if the auction has already ended (e_time is in the past)
-        RAISE EXCEPTION 'Cannot place a bid on an auction that has ended.';
+        -- Raise an exception if the auction is outside the allowed time window
+        RAISE EXCEPTION 'Outside the Auction Time Window';
     END IF;
 
-    -- If auction is still active (e_time is in the future), allow the insert
+    -- If auction is still active, allow the insert
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 
 -- Step 2: Create the trigger to call the function before inserting a bid
-CREATE TRIGGER prevent_bid_on_ended_auction
+CREATE OR REPLACE TRIGGER prevent_bid_on_ended_auction
 BEFORE INSERT ON bids
 FOR EACH ROW
 EXECUTE FUNCTION check_auction_status_before_bid();
 
+CREATE OR REPLACE FUNCTION update_artist_role_on_bid()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM users WHERE uid = NEW.bidder_uid AND artist_role = 'artist') THEN
+        UPDATE users SET artist_role = 'both' WHERE uid = NEW.bidder_uid;
+    END IF;
 
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER update_role_on_bid
+AFTER INSERT ON bids
+FOR EACH ROW
+EXECUTE FUNCTION update_artist_role_on_bid();
+
+
+CREATE OR REPLACE FUNCTION update_artist_role_on_artwork_upload()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM users WHERE uid = NEW.artist_id AND artist_role = 'none') THEN
+        UPDATE users SET artist_role = 'both' WHERE uid = NEW.artist_id;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER update_role_on_artwork_upload
+AFTER INSERT ON artworks
+FOR EACH ROW
+EXECUTE FUNCTION update_artist_role_on_artwork_upload();

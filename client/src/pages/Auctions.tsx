@@ -3,6 +3,7 @@ import { AuctionCard } from "../components/AuctionCard";
 import { AuctionModal } from "../components/AuctionModal";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toastError, toastSuccess } from "../toasts";
+import CreateAuctionModal from "../components/CreateAuctionModal";
 
 interface Auction {
     auction_id: string;
@@ -18,15 +19,18 @@ interface Auction {
 interface AuctionsResponse {
     trendingAuctions: Auction[];
     newestAuctions: Auction[];
+    upcomingAuctions: Auction[];
 }
 
 const AuctionsPage: FunctionComponent = () => {
     // State to store auction data
     const [trendingAuctions, setTrendingAuctions] = useState<any[]>([]);
     const [newestAuctions, setNewestAuctions] = useState<any[]>([]);
+    const [upcomingAuctions, setUpcomingAuctions] = useState<any[]>([])
     const [loading, setLoading] = useState<boolean>(true);
     const [selectedAuction, setSelectedAuction] = useState<any | null>(null); // State to manage selected auction
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // State to control modal visibility
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
     const { id } = useParams()
     const navigate = useNavigate()
@@ -50,6 +54,7 @@ const AuctionsPage: FunctionComponent = () => {
             const data: AuctionsResponse = await response.json();
             setTrendingAuctions(data.trendingAuctions);
             setNewestAuctions(data.newestAuctions);
+            setUpcomingAuctions(data.upcomingAuctions)
             setLoading(false);
         } catch (error) {
             toastError("Something went wrong")
@@ -67,7 +72,7 @@ const AuctionsPage: FunctionComponent = () => {
         if (id) fetchAuction()
     }, [id])
 
-    const [forceRender, setForceRender] = useState(0)
+    const [_, setForceRender] = useState(0)
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -77,7 +82,7 @@ const AuctionsPage: FunctionComponent = () => {
         return () => clearInterval(interval);
     }, [])
 
-    const getFormattedTimeLeft = (endTime: string) => {
+    const getAuctionStatus = (endTime: string) => {
         const now = new Date();
         const end = new Date(endTime);
         const time = Math.max(0, end.getTime() - now.getTime());
@@ -117,10 +122,7 @@ const AuctionsPage: FunctionComponent = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    uid: "your-user-id",
-                    amount,
-                }),
+                body: JSON.stringify({amount}),
                 credentials: "include"
             });
 
@@ -140,27 +142,75 @@ const AuctionsPage: FunctionComponent = () => {
         }
     };
 
+    const handleAuctionSubmit = async (data: any) => {
+        try {
+            if (!data.image || data.image.length === 0) {
+                toastError("Image is required.");
+                return;
+            }
+
+            const formData = new FormData();
+
+            formData.append("image", data.image);
+            formData.append("artworkTitle", data.artworkTitle);
+            formData.append("startPrice", data.startPrice);
+            formData.append("startTime", data.startTime);
+            formData.append("endTime", data.endTime);
+
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/artwork`, {
+                method: "POST",
+                body: formData,
+                credentials: "include"
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                console.error("Failed to create auction:", error.message);
+                toastError("Failed to create auction: " + error.message);
+                return;
+            }
+
+            const result = await response.json();
+            toastSuccess("Auction created successfully!");
+            navigate(`/auctions/${result.auctionId}`);
+            fetchAuctions()
+        } catch (error) {
+            console.error("Error creating auction:", error);
+            toastError("Failed to create auction");
+        }
+    };
+
+
     if (loading) {
         return <div className="text-center p-8">Loading auctions...</div>;
     }
 
     return (
-        <div className="auctionsPage flex flex-col w-full h-full bg-gray-100">
+        <div className="auctionsPage flex flex-col w-full h-fit bg-gray-100">
             <AuctionModal
                 isOpen={isModalOpen}
                 auction={selectedAuction}
                 onClose={closeModal}
                 onBid={handleBid}
             />
-            <div className="routeSpecifier flex justify-between items-center px-36 h-32 bg-gray-200">
+            <CreateAuctionModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onSubmit={handleAuctionSubmit}
+            />
+
+            <div className="routeSpecifier flex shrink-0 justify-between items-center px-36 h-32 bg-gray-200">
                 <span className="text-4xl text-orange-600 font-extrabold">AUCTIONS</span>
                 <span className="italic text-xl">Bid and Win!</span>
             </div>
 
-            <div className="flex justify-center w-full grow px-36">
-                <div className="auctionsGrid grid grid-rows-2 gap-6 py-10 w-full lg:w-3/4 h-fit">
+            <div className="flex relative justify-center w-full h-fit px-36">
+                <div className="absolute flex w-full justify-end px-36 mt-4">
+                    <button onClick={() => setIsCreateModalOpen(true)} className="p-3 rounded-lg text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700">Create Auction</button>
+                </div>
+                <div className="auctionsGrid grid grid-rows-3 gap-6 py-5 w-full lg:w-3/4 h-fit">
                     {/* Trending Auctions */}
-                    <div className="trendingAuctions w-full overflow-x-auto scrollbar scrollbar-thumb-gray-500 scrollbar-track-gray-200">
+                    <div className="trendingAuctions w-full overflow-x-auto">
                         <h2 className="text-2xl font-bold mb-4">Trending Auctions</h2>
                         {trendingAuctions.length === 0 ? (
                             <div>No trending auctions available.</div>
@@ -172,7 +222,7 @@ const AuctionsPage: FunctionComponent = () => {
                                             title={auction.artwork_title}
                                             imageUrl={auction.image_url}
                                             highestBid={auction.highest_bid}
-                                            timeLeft={getFormattedTimeLeft(auction.e_time)}
+                                            timeLeft={getAuctionStatus(auction.e_time)}
                                         />
                                     </Link>
                                 ))}
@@ -194,13 +244,35 @@ const AuctionsPage: FunctionComponent = () => {
                                             title={auction.artwork_title}
                                             imageUrl={auction.image_url}
                                             highestBid={(auction.highest_bid)}
-                                            timeLeft={getFormattedTimeLeft(auction.e_time)}
+                                            timeLeft={getAuctionStatus(auction.e_time)}
                                         />
                                     </Link>
                                 ))}
                             </div>
                         )}
                     </div>
+
+                    {/* Upcoming Auctions */}
+                    <div className="upcomingAuctions w-full overflow-x-auto">
+                        <h2 className="text-2xl font-bold mb-4">Upcoming Auctions</h2>
+                        {upcomingAuctions.length === 0 ? (
+                            <div>No upcoming auctions available.</div>
+                        ) : (
+                            <div className="flex space-x-4">
+                                {upcomingAuctions.map((auction, index) => (
+                                    <Link to={`/auctions/${auction.auction_id}`} key={index}>
+                                        <AuctionCard
+                                            title={auction.artwork_title}
+                                            imageUrl={auction.image_url}
+                                            highestBid={(auction.highest_bid || 0)} // Default to 0 if no bid yet
+                                            timeLeft={`Starts in ${getAuctionStatus(auction.s_time)}`}
+                                        />
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
                 </div>
             </div>
         </div>

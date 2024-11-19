@@ -4,14 +4,23 @@ import { Button } from "flowbite-react";
 import RatingModal from "../components/RatingModal";
 import { toastError, toastSuccess } from "../toasts";
 
+export interface Artwork {
+    artwork_id: string;
+    image_url: string;
+    title: string;
+    highest_price: number;
+    status: string;
+    artist: string;
+    auction_id: string;
+}
+
 const ArtworksPage: FunctionComponent = () => {
-    // State to store artwork data
-    const [artworks, setArtworks] = useState<any[]>([]);
+    const [artworks, setArtworks] = useState<Artwork[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [showRatingModal, setShowRatingModal] = useState<boolean>(false);
-    const [selectedArtwork, setSelectedArtwork] = useState<any | null>(null);
+    const [selectedArtwork, setSelectedArtwork] = useState<Artwork | null>(null);
 
-    const openRatingModal = (artwork: any) => {
+    const openRatingModal = (artwork: Artwork) => {
         setSelectedArtwork(artwork);
         setShowRatingModal(true);
     };
@@ -24,9 +33,9 @@ const ArtworksPage: FunctionComponent = () => {
                     "Content-Type": "application/json",
                 },
                 credentials: "include",
-                body: JSON.stringify({ rating, artwork_id: selectedArtwork.artwork_id }),
+                body: JSON.stringify({ rating, artwork_id: selectedArtwork?.artwork_id }),
             });
-    
+
             const result = await response.json();
             if (response.ok) {
                 toastSuccess(result.message);
@@ -37,9 +46,8 @@ const ArtworksPage: FunctionComponent = () => {
             console.error("Error submitting review:", error);
             toastError("An error occurred. Please try again.");
         }
-    };    
+    };
 
-    // Fetch artworks data from the API
     useEffect(() => {
         const fetchArtworks = async () => {
             try {
@@ -75,22 +83,20 @@ const ArtworksPage: FunctionComponent = () => {
 
             <div className="flex justify-center w-full grow px-36">
                 <div className="artworksGrid grid grid-cols-3 gap-8 py-10 w-full lg:w-3/4 h-[35rem]">
-                    {/* Artworks */}
                     {artworks.length === 0 ? (
                         <div>No artworks available.</div>
                     ) : (
-                        artworks.map((artwork, index) => (
-                            <div className="bg-white p-2 shadow-lg rounded-xl flex flex-col justify-center items-center">
-                                <ArtworkCard
-                                    key={index}
-                                    artist={artwork.artist}
-                                    imageUrl={artwork.image_url}
-                                    title={artwork.title}
-                                    highestBid={artwork.highest_price}
-                                    status={artwork.status}
-                                    auction_id={artwork.auction_id}
-                                />
-                                <Button color="green" size="sm" onClick={() => openRatingModal(artwork)}>
+                        artworks.map((artwork) => (
+                            <div
+                                key={artwork.artwork_id}
+                                className="bg-white p-2 shadow-lg rounded-xl flex flex-col justify-center items-center"
+                            >
+                                <ArtworkCard artwork={artwork} />
+                                <Button
+                                    color="green"
+                                    size="sm"
+                                    onClick={() => openRatingModal(artwork)}
+                                >
                                     Rate this artwork
                                 </Button>
                             </div>

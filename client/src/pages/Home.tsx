@@ -59,7 +59,7 @@ const Home: FunctionComponent = () => {
 
     return (
         <div className="homePage w-full h-full flex flex-col space-y-10">
-            <div className="infoContainer flex w-full grow px-36 py-5">
+            <div className="infoContainer flex w-full h-full px-36 py-5">
                 <div className="grid grid-cols-4 w-full h-full">
                     <div className="profileNav flex flex-col space-y-5">
                         <div className="profileInfo flex items-center space-x-2">
@@ -92,7 +92,7 @@ const Home: FunctionComponent = () => {
                             <Button color="failure" size="lg" onClick={handleLogout}>Logout</Button>
                         </div>
                     </div>
-                    <div className="infoDisplay col-span-3 rounded-lg bg-gray-200">
+                    <div className="infoDisplay overflow-y-auto col-span-3 rounded-lg bg-gray-200">
                         <Outlet />
                     </div>
                 </div>

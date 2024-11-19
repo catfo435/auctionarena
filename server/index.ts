@@ -33,6 +33,20 @@ app.use("/api/auction",auctionRoutes)
 app.use("/api/artwork",artworkRoutes)
 app.use("/api/review",reviewRoutes)
 
+const interval = 30000;
+
+function keepAlive() {
+  fetch(process.env.FRONTEND_URL!)
+    .then((response) => {
+      console.log(`Pinged at ${new Date().toISOString()}: Status Code ${response.status}`);
+    })
+    .catch((error) => {
+      console.error(`Error pinging at ${new Date().toISOString()}:, error.message`);
+    });
+}
+
+setInterval(keepAlive, interval)
+
 const modifyAuctions = async () => {
   try {
       const query = `

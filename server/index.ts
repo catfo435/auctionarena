@@ -41,7 +41,7 @@ function keepAlive() {
       console.log(`Pinged at ${new Date().toISOString()}: Status Code ${response.status}`);
     })
     .catch((error) => {
-      console.error(`Error pinging at ${new Date().toISOString()}:, error.message`);
+      console.error(`Error pinging at ${new Date().toISOString()}:, ${error.message}`);
     });
 }
 

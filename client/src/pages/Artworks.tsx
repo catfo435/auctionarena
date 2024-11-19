@@ -76,20 +76,20 @@ const ArtworksPage: FunctionComponent = () => {
                 onClose={() => setShowRatingModal(false)}
                 onRate={submitRating}
             />
-            <div className="routeSpecifier flex justify-between items-center px-36 h-32 bg-gray-200">
+            <div className="routeSpecifier flex shrink-0 justify-between items-center px-36 h-32 bg-gray-200">
                 <span className="text-4xl text-orange-600 font-extrabold">ARTWORKS</span>
                 <span className="italic text-xl">Get Mesmerized</span>
             </div>
 
             <div className="flex justify-center w-full grow px-36">
-                <div className="artworksGrid grid grid-cols-3 gap-8 py-10 w-full lg:w-3/4 h-[35rem]">
+                <div className="artworksGrid grid grid-cols-3 gap-8 py-10 w-full lg:w-3/4">
                     {artworks.length === 0 ? (
                         <div>No artworks available.</div>
                     ) : (
                         artworks.map((artwork) => (
                             <div
                                 key={artwork.artwork_id}
-                                className="bg-white p-2 shadow-lg rounded-xl flex flex-col justify-center items-center"
+                                className="bg-white p-2 w-fit h-fit shadow-lg rounded-xl flex flex-col justify-center items-center"
                             >
                                 <ArtworkCard artwork={artwork} />
                                 <Button

@@ -189,7 +189,7 @@ router.get('/bids', authenticateToken, getUserIdFromEmail, async (req: Request, 
             SELECT 
                 aw.title AS artwork_name,
                 b.bid_price AS bid_amount,
-                TO_CHAR(b.bid_time, 'YYYY-MM-DD HH24:MI:SS') AS bid_date
+                b.bid_time AS bid_date
             FROM bids b
             JOIN auctions a ON b.auction_id = a.auction_id
             JOIN artworks aw ON a.artwork_id = aw.artwork_id

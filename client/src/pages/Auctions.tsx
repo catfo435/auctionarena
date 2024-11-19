@@ -8,10 +8,11 @@ import CreateAuctionModal from "../components/CreateAuctionModal";
 interface Auction {
     auction_id: string;
     artwork_id: string;
-    status: 'ongoing' | 'completed';
+    status: 'ongoing' | 'completed' | 'future';
     s_time: string;
     e_time: string;
     highest_bid: number;
+    num_bids: number,
     artwork_title: string;
     image_url: string;
 }
@@ -122,7 +123,7 @@ const AuctionsPage: FunctionComponent = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({amount}),
+                body: JSON.stringify({ amount }),
                 credentials: "include"
             });
 
@@ -186,7 +187,7 @@ const AuctionsPage: FunctionComponent = () => {
     }
 
     return (
-        <div className="auctionsPage flex flex-col w-full h-fit bg-gray-100">
+        <div className="auctionsPage flex flex-col w-full h-full overflow-y-auto bg-gray-100">
             <AuctionModal
                 isOpen={isModalOpen}
                 auction={selectedAuction}
@@ -204,24 +205,25 @@ const AuctionsPage: FunctionComponent = () => {
                 <span className="italic text-xl">Bid and Win!</span>
             </div>
 
-            <div className="flex relative justify-center w-full h-fit px-36">
-                <div className="absolute flex w-full justify-end px-36 mt-4">
+            <div className="relative w-full grow px-36">
+                <div className="absolute right-5 top-0 mt-4">
                     <button onClick={() => setIsCreateModalOpen(true)} className="p-3 rounded-lg text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700">Create Auction</button>
                 </div>
-                <div className="auctionsGrid grid grid-rows-3 gap-6 py-5 w-full lg:w-3/4 h-fit">
-                    {/* Trending Auctions */}
-                    <div className="trendingAuctions w-full overflow-x-auto">
-                        <h2 className="text-2xl font-bold mb-4">Trending Auctions</h2>
+                <div className="auctions flex flex-col items-center space-y-4 py-5 w-full h-full">
+
+                    <div className="trendingAuctions w-full">
+                        <span className="text-2xl font-bold">Trending Auctions</span>
                         {trendingAuctions.length === 0 ? (
                             <div>No trending auctions available.</div>
                         ) : (
-                            <div className="flex space-x-4">
+                            <div className="flex space-x-4 overflow-x-auto">
                                 {trendingAuctions.map((auction, index) => (
                                     <Link to={`/auctions/${auction.auction_id}`} key={index}>
                                         <AuctionCard
                                             title={auction.artwork_title}
                                             imageUrl={auction.image_url}
-                                            highestBid={auction.highest_bid}
+                                            type="trending"
+                                            quantity={auction.num_bids}
                                             timeLeft={getAuctionStatus(auction.e_time)}
                                         />
                                     </Link>
@@ -231,19 +233,19 @@ const AuctionsPage: FunctionComponent = () => {
                     </div>
 
 
-                    {/* Newest Auctions */}
-                    <div className="newestAuctions w-full overflow-x-auto">
+                    <div className="newestAuctions w-full">
                         <h2 className="text-2xl font-bold mb-4">Newest Auctions</h2>
                         {newestAuctions.length === 0 ? (
                             <div>No newest auctions available.</div>
                         ) : (
-                            <div className="flex space-x-4">
+                            <div className="flex space-x-4 overflow-x-auto">
                                 {newestAuctions.map((auction, index) => (
                                     <Link to={`/auctions/${auction.auction_id}`} key={index}>
                                         <AuctionCard
                                             title={auction.artwork_title}
                                             imageUrl={auction.image_url}
-                                            highestBid={(auction.highest_bid)}
+                                            type="latest"
+                                            quantity={(auction.highest_bid)}
                                             timeLeft={getAuctionStatus(auction.e_time)}
                                         />
                                     </Link>
@@ -252,19 +254,18 @@ const AuctionsPage: FunctionComponent = () => {
                         )}
                     </div>
 
-                    {/* Upcoming Auctions */}
-                    <div className="upcomingAuctions w-full overflow-x-auto">
+                    <div className="upcomingAuctions w-full">
                         <h2 className="text-2xl font-bold mb-4">Upcoming Auctions</h2>
                         {upcomingAuctions.length === 0 ? (
                             <div>No upcoming auctions available.</div>
                         ) : (
-                            <div className="flex space-x-4">
+                            <div className="flex flex-wrap gap-4">
                                 {upcomingAuctions.map((auction, index) => (
                                     <Link to={`/auctions/${auction.auction_id}`} key={index}>
                                         <AuctionCard
                                             title={auction.artwork_title}
                                             imageUrl={auction.image_url}
-                                            highestBid={(auction.highest_bid || 0)} // Default to 0 if no bid yet
+                                            type="upcoming"
                                             timeLeft={`Starts in ${getAuctionStatus(auction.s_time)}`}
                                         />
                                     </Link>

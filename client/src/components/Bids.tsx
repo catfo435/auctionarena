@@ -11,7 +11,7 @@ const Bids: FunctionComponent = () => {
                     const data = await res.json();
                     setBids(data); // Set the bids data
                 } else {
-                    toastError("Failed to fetch bids data");
+                    if (res.status !== 404) toastError("Failed to fetch bids data");
                 }
             })
             .catch((e) => {
@@ -42,8 +42,8 @@ const Bids: FunctionComponent = () => {
                             bids.map((bid, index) => (
                                 <tr key={index} className="odd:bg-white even:bg-gray-50">
                                     <td className="border p-2 border-gray-300">{bid.artwork_name}</td>
-                                    <td className="border p-2 border-gray-300">{bid.bid_amount}</td>
-                                    <td className="border p-2 border-gray-300">{bid.bid_date}</td>
+                                    <td className="border p-2 border-gray-300">{parseFloat(bid.bid_amount).toLocaleString("en-IN",{style : "currency", currency : "INR"})}</td>
+                                    <td className="border p-2 border-gray-300">{new Date(bid.bid_date).toLocaleDateString()}</td>
                                 </tr>
                             ))
                         )}

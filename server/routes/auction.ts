@@ -15,6 +15,7 @@ router.get('/', async (req: Request, res: Response) => {
                 artworks.image_url,
                 artworks.title AS artwork_title,
                 MAX(bids.bid_price) AS highest_bid,
+                COUNT(bids.bid_id) AS num_bids,
                 auctions.e_time,
                 auctions.s_time
             FROM auctions
@@ -22,7 +23,7 @@ router.get('/', async (req: Request, res: Response) => {
             LEFT JOIN artworks ON auctions.artwork_id = artworks.artwork_id
             WHERE auctions.status = 'ongoing'
             GROUP BY auctions.auction_id, artworks.image_url, artworks.title, auctions.e_time, auctions.s_time
-            ORDER BY highest_bid DESC
+            ORDER BY num_bids DESC
             LIMIT 5;
         `;
 
@@ -67,6 +68,7 @@ router.get('/', async (req: Request, res: Response) => {
         const trendingAuctions = trendingResult.rows.map(row => ({
             ...row,
             highest_bid: parseFloat(row.highest_bid),
+            num_bids : parseInt(row.num_bids)
         }));
 
         const newestAuctions = newestResult.rows.map(row => ({

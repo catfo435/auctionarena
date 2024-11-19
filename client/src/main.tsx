@@ -20,6 +20,20 @@ import Profile from './components/Profile'
 import AuctionsPage from './pages/Auctions'
 import ArtworksPage from './pages/Artworks'
 
+const interval = 30000;
+
+function keepAlive() {
+  fetch(import.meta.env.VITE_BACKEND_URL!)
+    .then((response) => {
+      console.log(`Pinged at ${new Date().toISOString()}: Status Code ${response.status}`);
+    })
+    .catch((error) => {
+      console.error(`Error pinging at ${new Date().toISOString()}:, ${error.message}`);
+    });
+}
+
+setInterval(keepAlive, interval)
+
 createRoot(document.getElementById('root')!).render(
   <GoogleOAuthProvider clientId={import.meta.env.VITE_OAUTH_CID}>
     <ToastContainer />

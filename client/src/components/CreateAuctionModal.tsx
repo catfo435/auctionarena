@@ -26,6 +26,7 @@ const CreateAuctionModal: FunctionComponent<CreateAuctionModalProps> = ({
         register,
         handleSubmit,
         watch,
+        reset,
         formState: { errors },
     } = useForm<AuctionFormValues>();
 
@@ -66,6 +67,7 @@ const CreateAuctionModal: FunctionComponent<CreateAuctionModalProps> = ({
             endTime: data.endTime,
         };
         onSubmit(auctionData);
+        reset()
         onClose();
     };
 

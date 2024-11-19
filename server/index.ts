@@ -79,7 +79,7 @@ setInterval(() => {
   modifyAuctions();
 }, 60 * 1000);
 
-app.get('/', (req: Request, res: Response) => {
+app.get('/api', (req: Request, res: Response) => {
   res.send('Welcome to the API for Art Auction Portal');
 });
 

@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from "react";
+import { FunctionComponent, useEffect, useState } from "react";
 import { Modal, Button, Rating } from "flowbite-react";
 
 interface RatingModalProps {
@@ -21,6 +21,10 @@ export const RatingModal: FunctionComponent<RatingModalProps> = ({ isOpen, artwo
             alert("Please select a rating before submitting.");
         }
     };
+
+    useEffect(() => {
+        setRating(0)
+    },[isOpen])
 
     return (
         <Modal show={isOpen} onClose={onClose} size="lg">

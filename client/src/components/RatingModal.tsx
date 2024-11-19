@@ -1,4 +1,4 @@
-import { FunctionComponent, useEffect, useState } from "react";
+import { FunctionComponent, useState, useEffect } from "react";
 import { Modal, Button, Rating } from "flowbite-react";
 
 interface RatingModalProps {
@@ -11,27 +11,38 @@ interface RatingModalProps {
 export const RatingModal: FunctionComponent<RatingModalProps> = ({ isOpen, artwork, onClose, onRate }) => {
     const [rating, setRating] = useState<number>(0);
 
+    useEffect(() => {
+        if (isOpen && artwork) {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/review/${artwork.artwork_id}`, {credentials : "include"})
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data && data.length > 0) {
+                        setRating(data[0].rating);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching rating:", error);
+                });
+        }
+    }, [isOpen, artwork]);
+
     if (!isOpen || !artwork) return null;
 
     const handleRate = () => {
         if (rating > 0) {
             onRate(rating);
             onClose();
+            setRating(0);
         } else {
             alert("Please select a rating before submitting.");
         }
     };
-
-    useEffect(() => {
-        setRating(0)
-    },[isOpen])
 
     return (
         <Modal show={isOpen} onClose={onClose} size="lg">
             <Modal.Header>Rate Artwork</Modal.Header>
             <Modal.Body>
                 <div className="grid grid-cols-2">
-                    {/* Artwork Image */}
                     <div className="w-full aspect-w-16 aspect-h-9 p-8">
                         <img
                             src={artwork.image_url}
@@ -39,7 +50,6 @@ export const RatingModal: FunctionComponent<RatingModalProps> = ({ isOpen, artwo
                             className="w-full h-full object-contain rounded-lg"
                         />
                     </div>
-                    {/* Rating Section */}
                     <div className="flex flex-col items-center justify-between py-10 space-y-10">
                         <div className="text-center">
                             <span className="font-bold text-3xl">{artwork.title}</span>

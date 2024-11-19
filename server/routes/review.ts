@@ -43,4 +43,31 @@ router.post("/",getUserIdFromEmail, async (req : Request, res : Response) => {
     }
 });
 
+router.get("/:artwork_id", getUserIdFromEmail, async (req: Request, res: Response) => {
+    const { artwork_id } = req.params;
+    const { userId } = res.locals;
+
+    if (!artwork_id) {
+        res.status(400).json({ error: "Artwork ID is required." });
+        return;
+    }
+
+    try {
+        const reviewResult = await pool.query(
+            "SELECT * FROM reviews WHERE artwork_id = $1 AND uid = $2",
+            [artwork_id, userId]
+        );
+
+        if (reviewResult.rows.length === 0) {
+            res.status(404).json({ message: "No reviews found for this artwork." });
+            return;
+        }
+
+        res.status(200).json(reviewResult.rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: "An error occurred while fetching the review." });
+    }
+});
+
 export default router

@@ -230,9 +230,12 @@ router.post('/login', async (req: Request, res: Response) => {
             return
         }
 
+        console.log(process.env.HOST_DOMAIN)
+
         res.cookie("token", credentialResponse.credential, {
             secure: process.env.DEPLOYED_STATUS === "true",
             httpOnly: true,
+            path: "/",
             domain: process.env.DEPLOYED_STATUS === "true" ? process.env.HOST_DOMAIN : "",
             sameSite: "strict"
         });        

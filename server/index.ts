@@ -7,6 +7,7 @@ import { authenticateToken } from './middleware/authenticateToken';
 import userRoutes from './routes/user'
 import auctionRoutes from './routes/auction'
 import artworkRoutes from './routes/artwork'
+import reviewRoutes from './routes/review'
 dotenv.config();
 
 const app = express();
@@ -30,6 +31,32 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 app.use("/api/user",userRoutes)
 app.use("/api/auction",auctionRoutes)
 app.use("/api/artwork",artworkRoutes)
+app.use("/api/review",reviewRoutes)
+
+const invalidateAuctions = async () => {
+  try {
+      const now = new Date();
+      const query = `
+          UPDATE auctions
+          SET status = 'ended'
+          WHERE status = 'ongoing' AND e_time < $1::timestamp
+      `;
+      const result = await pool.query(query, [now]);
+
+      if (result.rowCount) {
+          console.log(`Invalidated ${result.rowCount} auction(s):`, result.rows.map(row => row.auction_id));
+      } else {
+          console.log('No auctions to invalidate.');
+      }
+  } catch (error) {
+      console.error('Error invalidating auctions:', error);
+  }
+};
+
+// Schedule the task to run every minute
+setInterval(() => {
+  invalidateAuctions();
+}, 60 * 1000);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to the API for Art Auction Portal');

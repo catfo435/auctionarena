@@ -1,4 +1,5 @@
 const flowbite = require("flowbite-react/tailwind");
+const scrollbar = require('tailwind-scrollbar')
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -10,7 +11,7 @@ export default {
   theme: {
     extend: {},
   },
-  plugins: [flowbite.plugin(),function({ addBase }) {
+  plugins: [flowbite.plugin(),scrollbar,function({ addBase }) {
     addBase({
       html: { fontSize: '12px' },
     });

@@ -9,13 +9,14 @@ router.use(authenticateToken)
 router.get('/', async (req: Request, res: Response) => {
     try {
         const query = `
-            SELECT artworks.artwork_id,auctions.auction_id, artworks.title, artworks.image_url,
+            SELECT artworks.artwork_id,auctions.auction_id, artworks.title,users.name artist, artworks.image_url,
                    MAX(bids.bid_price) AS highest_price,
                    auctions.status
             FROM artworks
+            JOIN users on artworks.artist_id=users.uid
             JOIN auctions ON artworks.artwork_id = auctions.artwork_id
             LEFT JOIN bids ON auctions.auction_id = bids.auction_id
-            GROUP BY artworks.artwork_id,auctions.status,auctions.auction_id
+            GROUP BY artworks.artwork_id,auctions.status,auctions.auction_id,users.name
             ORDER BY highest_price DESC
             LIMIT 10;
         `;

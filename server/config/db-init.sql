@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS auctions (
 CREATE TABLE IF NOT EXISTS reviews (
     uid UUID REFERENCES users(uid),
     rating INT NOT NULL,
-    date DATE NOT NULL,
+    date DATE NOT NULL DEFAULT NOW(),
     artwork_id UUID REFERENCES artworks(artwork_id),
     PRIMARY KEY (uid, date, artwork_id)
 );

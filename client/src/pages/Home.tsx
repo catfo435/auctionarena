@@ -36,7 +36,6 @@ const Home: FunctionComponent = () => {
         navigate("/login");
       }
 
-    // Sync `activePath` with `location.pathname` on route changes
     useEffect(() => {
         fetch(`${import.meta.env.VITE_BACKEND_URL}/user/info`, { credentials: "include" })
             .then(async (res) => {

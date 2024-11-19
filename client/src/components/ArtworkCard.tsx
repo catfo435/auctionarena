@@ -4,9 +4,11 @@ import { Link } from "react-router-dom";
 
 interface ArtworkCardProps {
     imageUrl: string;
+    artist: string
     title: string;
     highestBid: number;
     status: string;
+    auction_id : string
 }
 
 export const ArtworkCard: FunctionComponent<ArtworkCardProps> = ({
@@ -14,19 +16,24 @@ export const ArtworkCard: FunctionComponent<ArtworkCardProps> = ({
     title,
     highestBid,
     status,
+    artist,
+    auction_id
 }) => {
     return (
-        <Card className="shadow-lg rounded-xl p-2">
+        <Card className="shadow-none border-none w-80 h-52">
             <div className="flex items-center">
                 <img
                     src={imageUrl}
                     alt={title}
-                    className="w-32 h-32 object-cover rounded-lg mr-4"
+                    className="w-32 h-32 object-cove mr-4"
                 />
                 <div className="flex flex-col space-y-2">
-                    <h5 className="text-xl font-bold text-gray-900 mb-2">
-                        {title}
-                    </h5>
+                    <div className="flex flex-col">
+                        <span className="text-xl font-bold text-gray-900 mb-2">
+                            {title}
+                        </span>
+                        <span className="italic">{artist}</span>
+                    </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         <span className="font-bold">Highest Bid: </span>
                         {highestBid.toLocaleString("en-IN", {
@@ -40,7 +47,7 @@ export const ArtworkCard: FunctionComponent<ArtworkCardProps> = ({
                     >
                         {status.toUpperCase()}
                     </p>
-                    {status==="ongoing"?<Link className="text-sm underline" to={`/auctions`}>Go to the Auction</Link>:<></>}
+                    {status === "ongoing" ? <Link className="text-sm underline" to={`/auctions/${auction_id}`}>Go to the Auction</Link> : <></>}
                 </div>
             </div>
         </Card>

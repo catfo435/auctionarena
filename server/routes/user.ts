@@ -221,7 +221,7 @@ router.post('/login', async (req: Request, res: Response) => {
             audience: process.env.VITE_OAUTH_CID
         });
 
-        const { email } = ticket.getPayload() as any;
+        const { email } = ticket.getPayload() as any
 
         let user = await pool.query("SELECT name FROM users WHERE email=$1", [email])
 

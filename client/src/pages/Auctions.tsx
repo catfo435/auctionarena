@@ -67,19 +67,42 @@ const AuctionsPage: FunctionComponent = () => {
         if (id) fetchAuction()
     }, [id])
 
-    // Function to format the time left in a human-readable way
-    const formatTimeLeft = (endTime: string) => {
+    const [forceRender, setForceRender] = useState(0)
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setForceRender((prev) => prev + 1);
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [])
+
+    const getFormattedTimeLeft = (endTime: string) => {
         const now = new Date();
         const end = new Date(endTime);
-        const timeDiff = end.getTime() - now.getTime();
+        const time = Math.max(0, end.getTime() - now.getTime());
 
-        if (timeDiff <= 0) return "Auction Ended";
+        if (time <= 0) return "Auction Ended";
 
-        const hours = Math.floor(timeDiff / (1000 * 3600));
-        const minutes = Math.floor((timeDiff % (1000 * 3600)) / (1000 * 60));
-        return `${hours}h ${minutes}m left`;
+        const months = Math.floor(time / (1000 * 3600 * 24 * 30));
+        const weeks = Math.floor((time % (1000 * 3600 * 24 * 30)) / (1000 * 3600 * 24 * 7));
+        const days = Math.floor((time % (1000 * 3600 * 24 * 7)) / (1000 * 3600 * 24));
+        const hours = Math.floor((time % (1000 * 3600 * 24)) / (1000 * 3600));
+        const minutes = Math.floor((time % (1000 * 3600)) / (1000 * 60));
+        const seconds = Math.floor((time % (1000 * 60)) / 1000);
+
+        return [
+            months > 0 ? `${months}m` : "",
+            weeks > 0 ? `${weeks}w` : "",
+            days > 0 ? `${days}d` : "",
+            hours > 0 ? `${hours}h` : "",
+            minutes > 0 ? `${minutes}m` : "",
+            seconds > 0 ? `${seconds}s` : ""
+        ]
+            .filter(Boolean)
+            .join(" ") + " left";
     };
-    
+
     const closeModal = () => {
         setIsModalOpen(false);
         setSelectedAuction(null);
@@ -137,7 +160,7 @@ const AuctionsPage: FunctionComponent = () => {
             <div className="flex justify-center w-full grow px-36">
                 <div className="auctionsGrid grid grid-rows-2 gap-6 py-10 w-full lg:w-3/4 h-fit">
                     {/* Trending Auctions */}
-                    <div className="trendingAuctions w-full overflow-x-auto">
+                    <div className="trendingAuctions w-full overflow-x-auto scrollbar scrollbar-thumb-gray-500 scrollbar-track-gray-200">
                         <h2 className="text-2xl font-bold mb-4">Trending Auctions</h2>
                         {trendingAuctions.length === 0 ? (
                             <div>No trending auctions available.</div>
@@ -148,14 +171,15 @@ const AuctionsPage: FunctionComponent = () => {
                                         <AuctionCard
                                             title={auction.artwork_title}
                                             imageUrl={auction.image_url}
-                                            highestBid={(auction.highest_bid)}
-                                            timeLeft={formatTimeLeft(auction.e_time)}
+                                            highestBid={auction.highest_bid}
+                                            timeLeft={getFormattedTimeLeft(auction.e_time)}
                                         />
                                     </Link>
                                 ))}
                             </div>
                         )}
                     </div>
+
 
                     {/* Newest Auctions */}
                     <div className="newestAuctions w-full overflow-x-auto">
@@ -170,7 +194,7 @@ const AuctionsPage: FunctionComponent = () => {
                                             title={auction.artwork_title}
                                             imageUrl={auction.image_url}
                                             highestBid={(auction.highest_bid)}
-                                            timeLeft={formatTimeLeft(auction.e_time)}
+                                            timeLeft={getFormattedTimeLeft(auction.e_time)}
                                         />
                                     </Link>
                                 ))}

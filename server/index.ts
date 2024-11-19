@@ -54,9 +54,9 @@ const invalidateAuctions = async () => {
 };
 
 // Schedule the task to run every minute
-setInterval(() => {
-  invalidateAuctions();
-}, 60 * 1000);
+// setInterval(() => {
+//   invalidateAuctions();
+// }, 60 * 1000);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to the API for Art Auction Portal');

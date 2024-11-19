@@ -232,21 +232,22 @@ EXECUTE FUNCTION validate_bid_price_func();
 CREATE OR REPLACE FUNCTION check_auction_status_before_bid()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Check if the associated auction has ended
+    -- Check if the auction's end time has already passed
     IF EXISTS (
         SELECT 1
         FROM auctions
         WHERE auction_id = NEW.auction_id
-        AND status = 'ended'
+        AND e_time < NOW()
     ) THEN
-        -- Raise an exception if the auction is ended
+        -- Raise an exception if the auction has already ended (e_time is in the past)
         RAISE EXCEPTION 'Cannot place a bid on an auction that has ended.';
     END IF;
 
-    -- If auction is not ended, allow the insert
+    -- If auction is still active (e_time is in the future), allow the insert
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
 
 -- Step 2: Create the trigger to call the function before inserting a bid
 CREATE TRIGGER prevent_bid_on_ended_auction
